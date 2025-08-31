@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Gestión de Clientes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container py-4">
+    <h2 class="text-center mb-4">Gestión de Clientes</h2>
+
+    <!-- 🔹 Formulario Crear -->
+    <form id="crearForm" class="card p-3 mb-4">
+      <h5>Agregar Cliente</h5>
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input type="text" id="c_nombre" class="form-control" placeholder="Nombre" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="c_apellido" class="form-control" placeholder="Apellido" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="c_telefono" class="form-control" placeholder="Teléfono" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="c_vereda" class="form-control" placeholder="Vereda">
+        </div>
+        <div class="col-md-6">
+          <input type="number" id="c_mensualidad" class="form-control" placeholder="Mensualidad">
+        </div>
+        <div class="col-md-3">
+          <select id="c_metodo" class="form-select">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Nequi">Nequi</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="number" id="c_pagado" class="form-control" placeholder="Pagado">
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-success">Crear</button>
+      </div>
+    </form>
+
+    <!-- 🔹 Formulario Editar (oculto por defecto) -->
+    <form id="editarForm" class="card p-3 mb-4 d-none">
+      <h5>Editar Cliente</h5>
+      <input type="hidden" id="e_id">
+      <div class="row g-2">
+        <div class="col-md-6">
+          <input type="text" id="e_nombre" class="form-control" placeholder="Nombre" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="e_apellido" class="form-control" placeholder="Apellido" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="e_telefono" class="form-control" placeholder="Teléfono" required>
+        </div>
+        <div class="col-md-6">
+          <input type="text" id="e_vereda" class="form-control" placeholder="Vereda">
+        </div>
+        <div class="col-md-6">
+          <input type="number" id="e_mensualidad" class="form-control" placeholder="Mensualidad">
+        </div>
+        <div class="col-md-3">
+          <select id="e_metodo" class="form-select">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Nequi">Nequi</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="number" id="e_pagado" class="form-control" placeholder="Pagado">
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Actualizar</button>
+        <button type="button" id="cancelarEditar" class="btn btn-secondary">Cancelar</button>
+      </div>
+    </form>
+
+    <!-- 🔹 Buscar -->
+    <input type="text" id="buscar" class="form-control mb-3" placeholder="Buscar por nombre, apellido o teléfono">
+
+    <!-- 🔹 Tabla -->
+    <table class="table table-bordered bg-white">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Apellido</th>
+          <th>Teléfono</th>
+          <th>Vereda</th>
+          <th>Mensualidad</th>
+          <th>Método</th>
+          <th>Pagado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="clientesTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const tabla = document.getElementById("clientesTable");
+    const buscar = document.getElementById("buscar");
+
+    const crearForm = document.getElementById("crearForm");
+    const editarForm = document.getElementById("editarForm");
+    const cancelarEditar = document.getElementById("cancelarEditar");
+
+    // 🔹 Cargar clientes
+    function cargarClientes() {
+      fetch("/clientes")
+        .then(res => res.json())
+        .then(data => mostrarClientes(data));
+    }
+
+    // 🔹 Mostrar clientes
+    function mostrarClientes(clientes) {
+      tabla.innerHTML = "";
+      clientes.forEach(c => {
+        tabla.innerHTML += `
+          <tr>
+            <td>${c.nombre}</td>
+            <td>${c.apellido}</td>
+            <td>${c.telefono}</td>
+            <td>${c.vereda}</td>
+            <td>${c.mensualidad}</td>
+            <td>${c.metodo}</td>
+            <td>${c.pagado}</td>
+            <td>
+              <button class="btn btn-warning btn-sm" onclick="editarCliente(${c.id})">Editar</button>
+              <button class="btn btn-danger btn-sm" onclick="eliminarCliente(${c.id})">Eliminar</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    // 🔹 Crear
+    crearForm.addEventListener("submit", e => {
+  e.preventDefault();
+  const cliente = {
+    nombre: document.getElementById("c_nombre").value.trim(),
+    apellido: document.getElementById("c_apellido").value.trim(),
+    telefono: document.getElementById("c_telefono").value.trim(),
+    vereda: document.getElementById("c_vereda").value.trim(),
+    mensualidad: parseFloat(document.getElementById("c_mensualidad").value) || 0,
+    metodo: document.getElementById("c_metodo").value,
+    pagado: parseInt(document.getElementById("c_pagado").value) || 0
+  };
+
+  fetch("/clientes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(cliente)
+  })
+  .then(res => res.json())
+  .then(() => { 
+    cargarClientes(); 
+    crearForm.reset(); 
+  });
+});
+
+    // 🔹 Editar (mostrar form)
+    function editarCliente(id) {
+      fetch(`/clientes/${id}`)
+        .then(res => res.json())
+        .then(c => {
+          editarForm.classList.remove("d-none");
+          document.getElementById("e_id").value = c.id;
+          document.getElementById("e_nombre").value = c.nombre;
+          document.getElementById("e_apellido").value = c.apellido;
+          document.getElementById("e_telefono").value = c.telefono;
+          document.getElementById("e_vereda").value = c.vereda;
+          document.getElementById("e_mensualidad").value = c.mensualidad;
+          document.getElementById("e_metodo").value = c.metodo;
+          document.getElementById("e_pagado").value = c.pagado;
+        });
+    }
+
+    // 🔹 Guardar cambios
+    editarForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const id = document.getElementById("e_id").value;
+      const cliente = {
+        nombre: document.getElementById("e_nombre").value,
+        apellido: document.getElementById("e_apellido").value,
+        telefono: document.getElementById("e_telefono").value,
+        vereda: document.getElementById("e_vereda").value,
+        mensualidad: document.getElementById("e_mensualidad").value,
+        metodo: document.getElementById("e_metodo").value,
+        pagado: document.getElementById("e_pagado").value
+      };
+      fetch(`/clientes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cliente)
+      }).then(() => { cargarClientes(); editarForm.reset(); editarForm.classList.add("d-none"); });
+    });
+
+    // 🔹 Cancelar edición
+    cancelarEditar.addEventListener("click", () => {
+      editarForm.reset();
+      editarForm.classList.add("d-none");
+    });
+
+    // 🔹 Eliminar
+    function eliminarCliente(id) {
+      if (confirm("¿Eliminar cliente?")) {
+        fetch(`/clientes/${id}`, { method: "DELETE" })
+          .then(() => cargarClientes());
+      }
+    }
+
+    // 🔹 Buscar en tiempo real
+    buscar.addEventListener("input", () => {
+      const q = buscar.value;
+      if (q.trim() === "") {
+        cargarClientes();
+      } else {
+        fetch(`/buscar?q=${q}`)
+          .then(res => res.json())
+          .then(data => mostrarClientes(data));
+      }
+    });
+
+    // Inicial
+    cargarClientes();
+  </script>
+</body>
+</html>
+
