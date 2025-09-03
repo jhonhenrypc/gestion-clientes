@@ -2,6 +2,7 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { URL } = require("url");
 
 
 const app = express();
@@ -11,12 +12,14 @@ app.use(express.static("public")); // Carpeta pública
 
 
 
+const dbUrl = new URL(process.env.DATABASE_URL);
+
 const db = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT,
+  host: dbUrl.hostname,
+  user: dbUrl.username,
+  password: dbUrl.password,
+  database: dbUrl.pathname.replace("/", ""),
+  port: dbUrl.port,
   ssl: {
     rejectUnauthorized: false
   }
