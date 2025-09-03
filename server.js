@@ -2,18 +2,35 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const { URL } = require("url");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
 
-// 🔹 Conexión a MySQL (Railway usa la variable de entorno)
-const db = mysql.createConnection(process.env.DATABASE_URL);
+// 🔹 Parsear la URL de conexión de Railway
+const dbUrl = new URL(process.env.DATABASE_URL);
 
-db.connect(err => {
-  if (err) throw err;
-  console.log("✅ Conectado a MySQL");
+const db = mysql.createPool({
+  host: dbUrl.hostname,
+  user: dbUrl.username,
+  password: dbUrl.password,
+  database: dbUrl.pathname.replace("/", ""),
+  port: dbUrl.port,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// 🔹 Probar conexión
+db.getConnection((err, connection) => {
+  if (err) {
+    console.error("❌ Error conectando a MySQL:", err.message);
+  } else {
+    console.log("✅ Conectado a MySQL en Railway");
+    connection.release();
+  }
 });
 
 // 🔹 Listar clientes
