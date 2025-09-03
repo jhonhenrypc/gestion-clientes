@@ -2,22 +2,21 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const { URL } = require("url");
+
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
 
-// 🔹 Parsear la URL de conexión de Railway
-const dbUrl = new URL(process.env.MYSQL_URL);
+
 
 const db = mysql.createPool({
-  host: dbUrl.hostname,
-  user: dbUrl.username,
-  password: dbUrl.password,
-  database: dbUrl.pathname.replace("/", ""),
-  port: dbUrl.port,
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  port: process.env.MYSQLPORT,
   ssl: {
     rejectUnauthorized: false
   }
