@@ -8,15 +8,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
 
-// 🔍 Verificar que Railway pase las variables
-console.log("🔍 Variables de conexión detectadas:");
-console.log("HOST:", process.env.MYSQLHOST);
-console.log("USER:", process.env.MYSQLUSER);
-console.log("DB:", process.env.MYSQLDATABASE);
-console.log("PORT:", process.env.MYSQLPORT);
-console.log("PASSWORD:", process.env.MYSQLPASSWORD ? "DEFINIDA" : "NO DEFINIDA");
-
-// 🔹 Conexión a MySQL usando Railway
+// ?? Conexión a MySQL con variables separadas de Railway
 const db = mysql.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
@@ -28,17 +20,17 @@ const db = mysql.createPool({
   }
 });
 
-// 🔹 Probar conexión
+// ?? Probar conexión
 db.getConnection((err, connection) => {
   if (err) {
-    console.error("❌ Error conectando a MySQL:", err.message);
+    console.error("? Error conectando a MySQL:", err.message);
   } else {
-    console.log("✅ Conectado a MySQL en Railway");
+    console.log("? Conectado a MySQL en Railway");
     connection.release();
   }
 });
 
-// 🔹 Listar clientes
+// ?? Listar clientes
 app.get("/clientes", (req, res) => {
   db.query("SELECT * FROM clientes", (err, result) => {
     if (err) throw err;
@@ -46,26 +38,21 @@ app.get("/clientes", (req, res) => {
   });
 });
 
-// 🔹 Crear cliente
+// ?? Crear cliente
 app.post("/clientes", (req, res) => {
   const { nombre, apellido, telefono, vereda, mensualidad, metodo, pagado } = req.body;
-  const sql =
-    "INSERT INTO clientes (nombre, apellido, telefono, vereda, mensualidad, metodo, pagado) VALUES (?, ?, ?, ?, ?, ?, ?)";
-  db.query(
-    sql,
-    [nombre, apellido, telefono, vereda, mensualidad, metodo, pagado],
-    (err, result) => {
-      if (err) {
-        console.error("Error al crear cliente:", err);
-        res.status(500).json({ error: "Error al crear cliente" });
-      } else {
-        res.json({ message: "Cliente creado", id: result.insertId });
-      }
+  const sql = "INSERT INTO clientes (nombre, apellido, telefono, vereda, mensualidad, metodo, pagado) VALUES (?, ?, ?, ?, ?, ?, ?)";
+  db.query(sql, [nombre, apellido, telefono, vereda, mensualidad, metodo, pagado], (err, result) => {
+    if (err) {
+      console.error("Error al crear cliente:", err);
+      res.status(500).json({ error: "Error al crear cliente" });
+    } else {
+      res.json({ message: "Cliente creado", id: result.insertId });
     }
-  );
+  });
 });
 
-// 🔹 Obtener cliente por ID
+// ?? Obtener cliente por ID
 app.get("/clientes/:id", (req, res) => {
   db.query("SELECT * FROM clientes WHERE id = ?", [req.params.id], (err, result) => {
     if (err) throw err;
@@ -73,7 +60,7 @@ app.get("/clientes/:id", (req, res) => {
   });
 });
 
-// 🔹 Editar cliente
+// ?? Editar cliente
 app.put("/clientes/:id", (req, res) => {
   const { id } = req.params;
   const { nombre, apellido, telefono, vereda, mensualidad, metodo, pagado } = req.body;
@@ -88,7 +75,7 @@ app.put("/clientes/:id", (req, res) => {
   );
 });
 
-// 🔹 Eliminar cliente
+// ?? Eliminar cliente
 app.delete("/clientes/:id", (req, res) => {
   db.query("DELETE FROM clientes WHERE id = ?", [req.params.id], (err, result) => {
     if (err) throw err;
@@ -96,7 +83,7 @@ app.delete("/clientes/:id", (req, res) => {
   });
 });
 
-// 🔹 Buscar clientes (nombre, apellido o teléfono)
+// ?? Buscar clientes (nombre, apellido o teléfono)
 app.get("/buscar", (req, res) => {
   const q = req.query.q;
   if (!q) return res.json([]);
@@ -111,8 +98,8 @@ app.get("/buscar", (req, res) => {
   });
 });
 
-// 🚀 Iniciar servidor
+// ?? Iniciar servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`?? Servidor corriendo en http://localhost:${PORT}`);
 });
