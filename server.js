@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
 
 // 🔹 Parsear la URL de conexión de Railway
-const dbUrl = new URL(process.env.DATABASE_URL);
+const dbUrl = new URL(process.env.MYSQL_URL);
 
 const db = mysql.createPool({
   host: dbUrl.hostname,
