@@ -8,13 +8,8 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
 
-// 🔹 Conexión a MySQL
-const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "clientes_db"
-});
+// 🔹 Conexión a MySQL (Railway usa la variable de entorno)
+const db = mysql.createConnection(process.env.DATABASE_URL);
 
 db.connect(err => {
   if (err) throw err;
