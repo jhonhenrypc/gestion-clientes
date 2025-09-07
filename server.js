@@ -2,11 +2,18 @@ const express = require("express");
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+require("dotenv").config(); // ✅ cargar variables del archivo .env
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public")); // Carpeta pública
+
+console.log("🔍 Variables de conexión:");
+console.log("HOST:", process.env.MYSQLHOST);
+console.log("USER:", process.env.MYSQLUSER);
+console.log("DB:", process.env.MYSQLDATABASE);
+console.log("PORT:", process.env.MYSQLPORT);
 
 // ?? Conexión a MySQL con variables separadas de Railway
 const db = mysql.createPool({
